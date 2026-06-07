@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Retro Formule - Finální Edice</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            background-color: #222;
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100%;
+            max-width: 360px;
+            height: 80vh;
+            background-color: #444;
+            overflow: hidden;
+            border: 4px solid #fff;
+        }
+
+        /* Středová dělicí čára */
+        .road-line {
+            position: absolute;
+            width: 8px;
+            height: 50px;
+            background-color: #fff;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        /* Krajnice */
+        .curb {
+            position: absolute;
+            top: 0;
+            width: 12px;
+            height: 100%;
+            background: repeating-linear-gradient(#ff0000, #ff0000 25px, #ffffff 25px, #ffffff 50px);
+        }
+        .curb-left { left: 0; }
+        .curb-right { right: 0; }
+
+        /* ROZMĚRY A ZÁKLAD AUTA */
+        .car-body, .wall-body {
+            position: absolute;
+            width: 70px;
+            height: 130px;
+        }
+
+        #player {
+            bottom: 80px;
+            z-index: 10;
+        }
+
+        /* Kola */
+        .wheel {
+            position: absolute;
+            width: 12px;
+            height: 24px;
+            background-color: #111;
+            border-radius: 3px;
+            z-index: 1;
+        }
+        .w-top-l { top: 15px; left: -10px; }
+        .w-top-r { top: 15px; right: -10px; }
+        .w-bot-l { bottom: 15px; left: -10px; }
+        .w-bot-r { bottom: 15px; right: -10px; }
+
+        /* Karoserie */
+        .chassis {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+        }
+
+        /* Kabina */
+        .cabin {
+            position: absolute;
+            width: 70%;
+            height: 45%;
+            top: 25%;
+            border-radius: 8px;
+            background-color: #222;
+            border: 2px solid rgba(255,255,255,0.3);
+            z-index: 3;
+        }
+
+        .letter-z {
+            position: absolute;
+            z-index: 5;
+            color: white;
+            font-size: 3.5rem;
+            font-weight: bold;
+            text-shadow: 2px 2px 0 #000;
+        }
+
+        /* DESIGN PRO HRÁČE (Modrá formule) */
+        .player-style .chassis {
+            background-color: #0066ff;
+            border: 3px solid #fff;
+        }
+        .player-style .front-wing {
+            position: absolute;
+            top: -6px;
+            left: -6px;
+            width: 82px;
+            height: 10px;
+            background-color: #0066ff;
+            border: 2px solid #fff;
+            border-radius: 2px;
+            z-index: 4;
+        }
+        .player-style .rear-wing {
+            position: absolute;
+            bottom: -6px;
+            left: -10px;
+            width: 90px;
+            height: 14px;
+            background-color: #222;
+            border: 2px solid #fff;
+            border-radius: 2px;
+            z-index: 4;
+        }
+
+        /* DESIGN PRO NEPŘÁTELE (Zelená auta) */
+        .enemy-style .chassis {
+            background-color: #33cc33;
+            border: 3px solid #111;
+        }
+        .enemy-style .cabin {
+            background-color: #1a4d1a;
+            top: 35%;
+            height: 40%;
+        }
+
+        /* STYL ČERVENÉ CIHLOVÉ ZDI */
+        .wall-body {
+            background-color: #b32424;
+            border: 4px solid #fff;
+            border-radius: 4px;
+            box-shadow: inset 0 0 20px #000, 3px 3px 0 rgba(0,0,0,0.4);
+            background-image: 
+                linear-gradient(90deg, transparent 50%, rgba(255,255,255,0.2) 50%),
+                linear-gradient(rgba(0,0,0,0.4) 3px, transparent 3px),
+                linear-gradient(90deg, rgba(0,0,0,0.4) 3px, transparent 3px);
+            background-size: 34px 24px, 100% 24px, 34px 100%;
+        }
+
+        /* Ovládání pro mobil */
+        #controls {
+            display: flex;
+            width: 100%;
+            max-width: 360px;
+            height: 20vh;
+            background-color: #111;
+        }
+
+        .btn {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #333;
+            color: white;
+            font-size: 3rem;
+            font-weight: bold;
+            border: 3px solid #555;
+            cursor: pointer;
+        }
+
+        .btn:active {
+            background-color: #555;
+        }
+
+        /* UI */
+        #ui {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            z-index: 100;
+            text-shadow: 2px 2px 0 #000;
+        }
+
+        /* Obrazovky */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            z-index: 200;
+            text-align: center;
+            padding: 25px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .overlay h1 {
+            font-size: 2.2rem;
+            margin-bottom: 20px;
+            color: #ff3333;
+        }
+
+        #win-screen h1 {
+            color: #00ff00;
+            font-size: 3.2rem;
+            letter-spacing: 2px;
+            margin: 15px 0;
+            animation: pulse 1s infinite alternate;
+        }
+
+        .indicie-box {
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 2px dashed #00ff00;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .overlay button {
+            padding: 12px 25px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            background-color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 25px;
+        }
+
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.05); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <div id="ui">
+            <div id="score-display">SKÓRE: 0</div>
+        </div>
+
+        <div class="curb curb-left" id="curb-l"></div>
+        <div class="curb curb-right" id="curb-r"></div>
+
+        <div id="player" class="car-body player-style">
+            <div class="front-wing"></div>
+            <div class="wheel w-top-l"></div>
+            <div class="wheel w-top-r"></div>
+            <div class="wheel w-bot-l"></div>
+            <div class="wheel w-bot-r"></div>
+            <div class="chassis">
+                <div class="letter-z">Z</div>
+                <div class="cabin"></div>
+            </div>
+            <div class="rear-wing"></div>
+        </div>
+
+        <div id="start-screen" class="overlay">
+            <h1>RETRO FORMULE</h1>
+            <p style="margin-bottom: 20px;">Uhýbej autům a cihlovým zdím.<br>Získej aspoň 35 bodů pro splnění mise!</p>
+            <button onclick="startGame()">START</button>
+        </div>
+
+        <div id="gameover-screen" class="overlay hidden">
+            <h1>BOURAČKA!</h1>
+            <p id="fail-comment" style="margin-bottom: 10px;"></p>
+            <p id="final-score-fail" style="font-size: 1.2rem;"></p>
+            <button onclick="startGame()">Zkusit znovu</button>
+        </div>
+
+        <div id="win-screen" class="overlay hidden">
+            <p style="font-size: 1.3rem; color: #aaa;">Rekordní jízda dokončena:</p>
+            <h1>Pergola</h1>
+            <p id="final-score-win" style="font-size: 1.4rem; color: #00ff00;"></p>
+            
+            <div class="indicie-box">
+                <p style="font-size: 1.1rem; color: #fff;">Další indicie je v:</p>
+                <p style="font-size: 1.4rem; font-weight: bold; color: #ffcc00; margin-top: 5px;">Borůvkový keř</p>
+            </div>
+            
+            <button onclick="startGame()">Hrát znovu</button>
+        </div>
+    </div>
+
+    <div id="controls">
+        <div class="btn" id="btn-left">◀</div>
+        <div class="btn" id="btn-right">▶</div>
+    </div>
+
+    <script>
+        const container = document.getElementById('game-container');
+        const player = document.getElementById('player');
+        const scoreDisplay = document.getElementById('score-display');
+        const startScreen = document.getElementById('start-screen');
+        const gameoverScreen = document.getElementById('gameover-screen');
+        const winScreen = document.getElementById('win-screen');
+        const curbL = document.getElementById('curb-l');
+        const curbR = document.getElementById('curb-r');
+
+        const btnLeft = document.getElementById('btn-left');
+        const btnRight = document.getElementById('btn-right');
+
+        let gameActive = false;
+        
+        const lanes = [55, 225]; 
+        let currentLane = 0; 
+
+        let speed = 5;
+        let maxSpeed = 26; 
+        let score = 0;
+        const targetScore = 35; 
+
+        let enemies = [];
+        let lines = [];
+        let animationFrameId;
+        let spawnTimer = 0;
+        let curbOffset = 0;
+
+        const carWidth = 70;
+        const carHeight = 130;
+
+        function initLines() {
+            lines.forEach(l => l.element.remove());
+            lines = [];
+            for (let i = 0; i < 8; i++) {
+                let lineEl = document.createElement('div');
+                lineEl.className = 'road-line';
+                container.appendChild(lineEl);
+                lines.push({ element: lineEl, y: i * 120 });
+            }
+        }
+
+        function startGame() {
+            gameActive = true;
+            currentLane = 0; 
+            player.style.left = lanes[currentLane] + 'px';
+            
+            speed = 5;
+            score = 0;
+            scoreDisplay.innerText = "SKÓRE: " + score;
+            spawnTimer = 0;
+
+            enemies.forEach(e => e.element.remove());
+            enemies = [];
+
+            startScreen.classList.add('hidden');
+            gameoverScreen.classList.add('hidden');
+            winScreen.classList.add('hidden');
+
+            initLines();
+
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+            animationFrameId = requestAnimationFrame(updateGame);
+        }
+
+        function switchLane(target) {
+            if (!gameActive) return;
+            currentLane = target;
+            player.style.left = lanes[currentLane] + 'px';
+        }
+
+        function updateGame() {
+            if (!gameActive) return;
+
+            if (speed < maxSpeed) speed += 0.0035;
+
+            curbOffset = (curbOffset + speed) % 50;
+            curbL.style.transform = `translateY(${curbOffset}px)`;
+            curbR.style.transform = `translateY(${curbOffset}px)`;
+
+            lines.forEach(line => {
+                line.y += speed;
+                if (line.y > container.clientHeight) line.y = -50;
+                line.element.style.top = line.y + 'px';
+            });
+
+            spawnTimer += speed;
+            const minSafeVerticalDistance = 240; 
+
+            if (spawnTimer > 100) {
+                let closestEnemyY = -999;
+                if (enemies.length > 0) {
+                    closestEnemyY = enemies[enemies.length - 1].y;
+                }
+
+                if (closestEnemyY > minSafeVerticalDistance || enemies.length === 0) {
+                    spawnTimer = 0;
+
+                    let nextLane = Math.floor(Math.random() * 2);
+                    
+                    if (enemies.length > 0 && enemies[enemies.length - 1].y < 350) {
+                        nextLane = enemies[enemies.length - 1].x === lanes[0] ? 1 : 0;
+                    }
+
+                    let isWall = Math.random() < 0.25;
+                    let enemyEl = document.createElement('div');
+
+                    if (isWall) {
+                        enemyEl.className = 'wall-body';
+                    } else {
+                        enemyEl.className = 'car-body enemy-style';
+                        enemyEl.innerHTML = `
+                            <div class="wheel w-top-l"></div>
+                            <div class="wheel w-top-r"></div>
+                            <div class="wheel w-bot-l"></div>
+                            <div class="wheel w-bot-r"></div>
+                            <div class="chassis"><div class="cabin"></div></div>
+                        `;
+                    }
+                    
+                    container.appendChild(enemyEl);
+                    
+                    enemies.push({
+                        element: enemyEl,
+                        x: lanes[nextLane],
+                        y: -carHeight,
+                        isWall: isWall,
+                        passed: false 
+                    });
+                }
+            }
+
+            const playerTop = container.clientHeight - 80 - carHeight;
+            const playerBottom = container.clientHeight - 80;
+
+            for (let i = enemies.length - 1; i >= 0; i--) {
+                let enemy = enemies[i];
+                enemy.y += (speed - 1.5); 
+                enemy.element.style.top = enemy.y + 'px';
+                enemy.element.style.left = enemy.x + 'px';
+
+                if (!enemy.passed && enemy.y > playerBottom) {
+                    enemy.passed = true;
+                    if (!enemy.isWall) { 
+                        score++;
+                        scoreDisplay.innerText = "SKÓRE: " + score;
+                    }
+                }
+
+                if (enemy.y > container.clientHeight) {
+                    enemy.element.remove();
+                    enemies.splice(i, 1);
+                    continue;
+                }
+
+                if (lanes[currentLane] === enemy.x) {
+                    if (enemy.y + carHeight > playerTop && enemy.y < playerBottom) {
+                        handleCrash();
+                        return;
+                    }
+                }
+            }
+
+            animationFrameId = requestAnimationFrame(updateGame);
+        }
+
+        function handleCrash() {
+            gameActive = false;
+            cancelAnimationFrame(animationFrameId);
+
+            if (score >= targetScore) {
+                document.getElementById('final-score-win').innerText = "Konečné skóre: " + score;
+                winScreen.classList.remove('hidden');
+            } else {
+                const comments = ["Bum! Zkus to ještě jednou.", "Chce to víc tréninku.", "Pozor na ty zdi!"];
+                document.getElementById('fail-comment').innerText = comments[Math.floor(Math.random() * comments.length)];
+                document.getElementById('final-score-fail').innerText = "Tvoje skóre: " + score + " / " + targetScore;
+                gameoverScreen.classList.remove('hidden');
+            }
+        }
+
+        // Ovládání mobil
+        btnLeft.addEventListener('touchstart', (e) => { e.preventDefault(); switchLane(0); });
+        btnRight.addEventListener('touchstart', (e) => { e.preventDefault(); switchLane(1); });
+        
+        // Ovládání PC myš
+        btnLeft.addEventListener('mousedown', () => switchLane(0));
+        btnRight.addEventListener('mousedown', () => switchLane(1));
+
+        // Ovládání PC klávesnice
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') switchLane(0);
+            if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') switchLane(1);
+        });
+    </script>
+</body>
+</html>

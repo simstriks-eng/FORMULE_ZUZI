@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Retro Formule - Indicie Edice</title>
+    <title>Retro Formule - Cesta za pokladem</title>
     <style>
         * {
             box-sizing: border-box;
@@ -226,13 +226,25 @@
             display: none !important;
         }
 
+        /* ÚPRAVA PRO TITULEK ÚKOLU */
         .overlay h1 {
-            font-size: 2.5rem;
-            margin-bottom: 20px;
-            color: #ff3333;
+            font-size: 1.6rem;
+            line-height: 1.4;
+            margin-bottom: 25px;
+            color: #00ffff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        /* STYL PRO VÍTĚZNOU OBRAZOVKU */
+        /* SPECIFICKÝ VZHLED PRO TEXT POKYNŮ */
+        .instruction-text {
+            font-size: 1.1rem;
+            line-height: 1.5;
+            margin-bottom: 25px;
+            color: #e0e0e0;
+            max-width: 300px;
+        }
+
         #win-screen h1 {
             color: #00ff00;
             font-size: 3rem;
@@ -287,22 +299,22 @@
             <div class="rear-wing"></div>
         </div>
 
-        <!-- Úvodní obrazovka -->
+        <!-- UPRAVENÁ ÚVODNÍ OBRAZOVKA S NOVÝMI TEXTY PRO HLEDAČKU POKLADU -->
         <div id="start-screen" class="overlay">
-            <h1>RETRO FORMULE</h1>
-            <p style="margin-bottom: 20px;">Uhýbej autům a cihlovým zdím.<br>Získej aspoň 35 bodů pro splnění mise!</p>
+            <h1>Vítej u dalšího úkolu, vedoucího k získání pokladu!</h1>
+            <p class="instruction-text">Uhýbej autům a cihlovým zdím. Získej alespoň 35 bodů pro splnění mise a získání další indicie! Hodně štěstí!</p>
             <button onclick="startGame()">START</button>
         </div>
 
         <!-- Game Over obrazovka -->
         <div id="gameover-screen" class="overlay hidden">
-            <h1>BOURAČKA!</h1>
+            <h1 style="color: #ff3333; font-size: 2.5rem;">BOURAČKA!</h1>
             <p id="fail-comment" style="margin-bottom: 10px;"></p>
             <p id="final-score-fail" style="font-size: 1.2rem;"></p>
             <button onclick="startGame()">Zkusit znovu</button>
         </div>
 
-        <!-- FINÁLNÍ VÍTĚZNÁ OBRAZOVKA - SLOVO PERGOLA JE ÚPLNĚ PRYČ -->
+        <!-- Finální vítězná obrazovka -->
         <div id="win-screen" class="overlay hidden">
             <p style="font-size: 1.3rem; color: #aaa;">Rekordní jízda dokončena:</p>
             <h1>Gratuluji!</h1>

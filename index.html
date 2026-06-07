@@ -232,7 +232,7 @@
             color: #ff3333;
         }
 
-        /* OPRAVENÝ STYL PRO VÍTĚZNOU OBRAZOVKU */
+        /* STYL PRO VÍTĚZNOU OBRAZOVKU */
         #win-screen h1 {
             color: #00ff00;
             font-size: 3rem;
@@ -264,13 +264,16 @@
 <body>
 
     <div id="game-container">
+        <!-- UI -->
         <div id="ui">
             <div id="score-display">SKÓRE: 0</div>
         </div>
 
+        <!-- Krajnice -->
         <div class="curb curb-left" id="curb-l"></div>
         <div class="curb curb-right" id="curb-r"></div>
 
+        <!-- Modrý hráč se Z -->
         <div id="player" class="car-body player-style">
             <div class="front-wing"></div>
             <div class="wheel w-top-l"></div>
@@ -284,12 +287,14 @@
             <div class="rear-wing"></div>
         </div>
 
+        <!-- Úvodní obrazovka -->
         <div id="start-screen" class="overlay">
             <h1>RETRO FORMULE</h1>
             <p style="margin-bottom: 20px;">Uhýbej autům a cihlovým zdím.<br>Získej aspoň 35 bodů pro splnění mise!</p>
             <button onclick="startGame()">START</button>
         </div>
 
+        <!-- Game Over obrazovka -->
         <div id="gameover-screen" class="overlay hidden">
             <h1>BOURAČKA!</h1>
             <p id="fail-comment" style="margin-bottom: 10px;"></p>
@@ -297,6 +302,7 @@
             <button onclick="startGame()">Zkusit znovu</button>
         </div>
 
+        <!-- FINÁLNÍ VÍTĚZNÁ OBRAZOVKA - SLOVO PERGOLA JE ÚPLNĚ PRYČ -->
         <div id="win-screen" class="overlay hidden">
             <p style="font-size: 1.3rem; color: #aaa;">Rekordní jízda dokončena:</p>
             <h1>Gratuluji!</h1>
@@ -311,6 +317,7 @@
         </div>
     </div>
 
+    <!-- Ovládání pro mobil -->
     <div id="controls">
         <div class="btn" id="btn-left">◀</div>
         <div class="btn" id="btn-right">▶</div>
